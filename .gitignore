@@ -1,0 +1,11 @@
+MohammadsLab5/.ipynb_checkpoints/ex05-checkpoint.ipynb
+MohammadsLab5/__pycache__/helpers.cpython-35.pyc
+MohammadsLab5/__pycache__/least_squares.cpython-35.pyc
+MohammadsLab5/__pycache__/plots.cpython-35.pyc
+MohammadsLab5/classification_by_least_square.png
+MohammadsLab5/classification_by_logistic_regression_gradient_descent.png
+MohammadsLab5/classification_by_logistic_regression_newton_method.png
+MohammadsLab5/height_weight_genders.csv
+MohammadsLab5/helpers.py
+MohammadsLab5/least_squares.py
+MohammadsLab5/plots.py
