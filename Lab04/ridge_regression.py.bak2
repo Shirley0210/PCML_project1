@@ -1,0 +1,21 @@
+# -*- coding: utf-8 -*-
+"""Exercise 3.
+
+Ridge Regression
+"""
+
+import numpy as np
+from costs import compute_loss
+
+def ridge_regression(y, tx, lamb):
+	"""implement ridge regression."""
+    # ***************************************************
+    # INSERT YOUR CODE HERE
+    # ridge regression: TODO
+	N = np.shape(y)[0]
+	M = np.shape(tx)[1]
+	w_opt = np.linalg.solve(np.dot(np.transpose(tx),tx)+lamb*np.identity(M),np.dot(np.transpose(tx),y))
+	rmse = np.sqrt(2*compute_loss(y, tx, w_opt))
+	return w_opt,rmse
+    # ***************************************************
+    #raise NotImplementedError
