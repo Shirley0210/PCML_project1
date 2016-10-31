@@ -19,25 +19,18 @@ def standardize(x, mean_x=None, std_x=None):
     tx = np.hstack((np.ones((x.shape[0],1)), x))
     return tx, mean_x, std_x
 
-
 # Function that clean the data set, 
 # i.e replace the -999 values by the column median of the valid entries
 # If a collumn is entirely filled by -999, we delete it.
-def clean_data(tX, medians=None, means=None, stds=None):
+def clean_data(tX, medians=None):
     nbrRows = tX.shape[0]
     nbrColunms = tX.shape[1]
     
-    if medians = None:
-        medians = np.zeros(nbrColunms)
-        
-    if means = None:
-        means = np.zeros(nbrColunms)
-        
-    if stds = None:
-        stds = np.zeros(nbrColunms)
- 
-    
     tX_cleaned = np.zeros((nbrRows,nbrColunms))
+    
+    if medians is None:
+        medians = np.zeros(nbrColunms)
+    
     
     for columnID in range(nbrColunms):
         currentColumn = tX[:,columnID].copy()
@@ -52,31 +45,72 @@ def clean_data(tX, medians=None, means=None, stds=None):
         tempColumm = np.delete(currentColumn, nanIndices, axis=0)
 
         # Replace -999 values with median
-        if medians[columnID] = 0.0:
+        if medians[columnID] == 0.0:
             medians[columnID] = np.median(tempColumm)
         
         currentColumn[nanIndices] = medians[columnID]
         
         tX_cleaned[:,columnID] = currentColumn
-        
-        if means[columnID] == 0.0:
-            if stds[columnID] == 0.0:
-                tX_stand, medians[columnID], stds[columnID] = standardize(tX_cleaned[columnID])
-        else:
-            tX_stand, medians[columnID], stds[columnID] = standardize(tX_cleaned[columnID], medians[columnID], stds[columnID]) 
     
-    tX_reformed = tX_stand.copy()
+    tX_reformed = tX_cleaned.copy()
     nbrOfDelete = 0
     
     for columnID in range(nbrColunms):  
         
         # Delete the column filled only by -999 values, i.e median == NaN
-        if np.isnan(tX_stand[:, columnID]).all():
+        if np.isnan(tX_cleaned[:, columnID]).all():
             tX_reformed = np.delete(tX_reformed, columnID - nbrOfDelete, 1)
             nbrOfDelete = nbrOfDelete + 1
     
-    return tX_reformed, medians, means, stds
+    return tX_reformed, medians
 
+def split_data(y, x, seed=1):
+    """split the dataset based on the split ratio."""
+    # set seed
+    np.random.seed(seed)
+    
+    # set mask
+    ratio = 0.2
+    msk = np.random.rand(len(y)) < ratio
+    
+    # training data set
+    x_tr = x[msk]
+    y_tr = y[msk]
+    
+    # test data set
+    x_test = x[~msk]
+    y_test = y[~msk]
+    
+    return x_tr, x_test, y_tr, y_test
+
+def cross_validation(y, tX, gamma, lambda_, max_iters, method):
+    # split data
+    x_tr, x_test, y_tr, y_test = split_data(y, tX)
+    
+    # training
+    loss = 0
+    weights = []
+    if method == 1:
+        loss, weights = least_squares_GD(y_tr, x_tr, gamma, max_iters)
+    elif method == 2:
+        loss, weights = least_squares_SGD(y_tr, x_tr, gamma, max_iters)
+    elif method == 3:
+        loss, weights = least_squares(y_tr, x_tr)
+    elif method == 4:
+        loss, weights = ridge_regression(y_tr, x_tr, lambda_)
+    elif method == 5:
+        loss, weights = logistic_regression(y_tr, x_tr, gamma, max_iters)
+    else:
+        loss, weights = reg_logistic_regression(y_tr, x_tr, lambda_, gamma, max_iters)
+        
+    # compute prediction
+    y_pred = predict_labels(weights, x_test)    
+    
+    # accuracy of the prediction
+    N = y_test.shape[0]
+    pred = np.sum(y_pred == y_test)/N
+        
+    return pred
 
 # Divide the data by jet features
 def separating_by_jet(tX):
